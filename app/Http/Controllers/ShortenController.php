@@ -44,7 +44,7 @@ class ShortenController extends Controller
         $meta->save();
 
         return response()->json([
-            'new-url' => 'http://127.0.0.1:8000/api/' . $value
+            'newUrl' => 'http://127.0.0.1:8000/api/' . $value
         ]);
     }
 
@@ -58,11 +58,49 @@ class ShortenController extends Controller
 
         $url = $meta->url;
 
+        $visitors = new Url_meta([
+            'url_id' => $url->id,
+            'key' => 'visitors',
+            'value' => ''
+        ]);
+
         if(!$url){
             abort(404);
         }
+        $visitors_value =  'visitors';
+        $old_visitors = Url_meta::where('key', $visitors_value)->where('url_id', $url->id)->orderBy('created_at', 'desc')->first();
+        $new_visitors = 0;
+        if($old_visitors->value > 0){
+            $old = $old_visitors->value + 1;
+            $new_visitors = $old;
+        }
+
+        if($old_visitors->value < 1){
+            $new_visitors = 1;
+        }
+        
+
+        $visitors = new Url_meta([
+            'url_id' => $url->id,
+            'key' => 'visitors',
+            'value' => $new_visitors
+        ]);
+
+        $visitors->save();
 
         return redirect($url->url);
+    }
+
+    public function visitFrequency(Request $request){
+        $meta = Url_meta::where('value', $request->value)->first();
+        $url = $meta->url;
+
+        $visitors = Url_meta::where('key', 'visitors')->where('url_id', $url->id)->orderBy('created_at', 'desc')->first();
+        $visitors_value = $visitors->value;
+        
+        return response()->json([
+            'visits' => $visitors_value
+        ]);
     }
 
     private function checkValue($value){

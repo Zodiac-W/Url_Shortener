@@ -40,6 +40,8 @@ Route::post('/url/store', [UserUrlController::class, 'store']);
 
 Route::post('/shorten', [ShortenController::class, 'shorten']);
 
+Route::post('/visits', [ShortenController::class, 'visitFrequency']);
+
 // Route::post('/trial', [ShortenController::class, 'redirectToOriginal']);
 
 Route::get('/{value}', [ShortenController::class, 'redirectToOriginal']);
